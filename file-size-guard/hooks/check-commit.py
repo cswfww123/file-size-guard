@@ -26,6 +26,10 @@ DEFAULT_TEST = 1200
 # `git commit`, `git -C dir commit`, `git commit -a`, but not `git log --grep=commit`
 COMMIT_RE = re.compile(r"(?:^|[;&|]\s*|\bsudo\s+)git(?:\s+-C\s+\S+)?(?:\s+-\S+)*\s+commit\b")
 NO_VERIFY_RE = re.compile(r"(?:^|\s)(?:--no-verify|-n)(?:\s|$)")
+# `cd somewhere && git commit` commits the repo after the cd, not the workspace.
+# Miss this and an agent working in a worktree or a scratch clone goes unchecked.
+CD_RE = re.compile(r"(?:^|[;&|]\s*)cd\s+(\"[^\"]+\"|'[^']+'|[^\s;&|]+)")
+GIT_C_RE = re.compile(r"\bgit\s+-C\s+(\"[^\"]+\"|'[^']+'|[^\s;&|]+)")
 
 
 def deny(message: str) -> None:
@@ -52,8 +56,31 @@ def run(args: list[str], cwd: Path) -> str:
     return p.stdout
 
 
+def _unquote(s: str) -> str:
+    if len(s) >= 2 and s[0] == s[-1] and s[0] in "\"'":
+        return s[1:-1]
+    return s
+
+
+def target_dir(command: str, cwd: Path) -> Path:
+    """Where the commit actually runs.
+
+    `cd repo && git commit` and `git -C repo commit` both commit a repo that is
+    not the workspace. The workspace is only the fallback.
+    """
+    for pattern in (GIT_C_RE, CD_RE):
+        found = pattern.search(command)
+        if found:
+            candidate = Path(_unquote(found.group(1)))
+            if not candidate.is_absolute():
+                candidate = cwd / candidate
+            if candidate.is_dir():
+                return candidate
+    return cwd
+
+
 def project_root(cwd: Path) -> Path | None:
-    for cand in (os.environ.get("CLAUDE_PROJECT_DIR"), str(cwd)):
+    for cand in (str(cwd), os.environ.get("CLAUDE_PROJECT_DIR")):
         if not cand:
             continue
         out = run(["git", "rev-parse", "--show-toplevel"], Path(cand)).strip()
@@ -176,7 +203,10 @@ def main() -> None:
     if not COMMIT_RE.search(command):
         allow()
 
-    cwd = Path(os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd())
+    # Resolve the repo from the command first: `cd elsewhere && git commit`
+    # and `git -C elsewhere commit` do not commit the workspace.
+    base_cwd = Path(os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd())
+    cwd = target_dir(command, base_cwd)
     root = project_root(cwd)
     if root is None:
         allow()

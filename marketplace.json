@@ -4,7 +4,7 @@
     {
       "name": "file-size-guard",
       "source": "./file-size-guard",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Blocks oversized Java and MyBatis mapper XML before they are committed. New files: 800 lines (src/main) / 1200 lines (src/test). Baselined files may shrink, never grow.",
       "displayName": "File Size Guard",
       "displayName_i18n": {

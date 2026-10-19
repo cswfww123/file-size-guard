@@ -1,6 +1,6 @@
 {
   "name": "file-size-guard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Blocks oversized Java and MyBatis mapper XML before they are committed: a new file may not exceed 800 lines under src/main or 1200 under src/test, and a baselined file may shrink or stay but never grow. Enable or disable it as a plugin.",
   "description_i18n": {
     "en": "Blocks oversized Java and MyBatis mapper XML before commit. New files: 800 lines (src/main) / 1200 lines (src/test). Baselined files may shrink, never grow.",

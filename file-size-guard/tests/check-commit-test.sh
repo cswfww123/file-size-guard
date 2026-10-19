@@ -111,6 +111,24 @@ fresh_repo; mkdir -p .git/info; printf '* linguist-generated\n' > .git/info/attr
 lines src/main/java/Gen.java $((LIMIT_MAIN*3)); git add -A
 expect ".git/info/attributes cannot exempt" 1 "git commit -m sneaky"
 
+# --- the repo comes from the command, not from the workspace ---
+# An agent in a worktree (or a scratch clone) commits with `cd repo && git
+# commit`. Judging CLAUDE_PROJECT_DIR there checks the wrong repo and passes.
+fresh_repo; lines src/main/java/Big.java $((LIMIT_MAIN+1)); git add -A
+other="$repo"
+fresh_repo   # `repo` is now a different, clean repository; the payload points at it
+expect "cd elsewhere still checks the commit target" 1 "cd $other && git commit -m big"
+
+fresh_repo; lines src/main/java/Big.java $((LIMIT_MAIN+1)); git add -A
+other="$repo"
+fresh_repo
+expect "git -C elsewhere still checks the commit target" 1 "git -C $other commit -m big"
+
+fresh_repo; lines src/main/java/Small.java 100; git add -A
+other="$repo"
+fresh_repo
+expect "cd elsewhere with a small file passes" 0 "cd $other && git commit -m ok"
+
 # --- merge judges only what it introduces ---
 fresh_repo; lines src/main/java/Legacy.java 2000; commit_all
 printf 'src/main/java/Legacy.java\t2000\n' > .file-size-baseline
