@@ -1,0 +1,40 @@
+{
+  "name": "file-size-guard",
+  "version": "0.1.0",
+  "description": "Blocks oversized Java and MyBatis mapper XML before they are committed: a new file may not exceed 800 lines under src/main or 1200 under src/test, and a baselined file may shrink or stay but never grow. Enable or disable it as a plugin.",
+  "description_i18n": {
+    "en": "Blocks oversized Java and MyBatis mapper XML before commit. New files: 800 lines (src/main) / 1200 lines (src/test). Baselined files may shrink, never grow.",
+    "zh-CN": "提交前拦截过大的 Java 与 MyBatis Mapper XML：新文件 src/main 限 800 行、src/test 限 1200 行；基线内文件只许变小、不许再长。以插件开关控制启停。"
+  },
+  "author": {
+    "name": "cswfww123"
+  },
+  "license": "MIT",
+  "keywords": [
+    "file-size",
+    "code-quality",
+    "pre-commit",
+    "java",
+    "mybatis",
+    "refactoring"
+  ],
+  "hooks": "hooks/hooks.json",
+  "skills": "skills",
+  "userConfig": {
+    "baseline_path": {
+      "type": "string",
+      "default": "",
+      "description": "可选：基线文件路径（每行 <相对路径><TAB><行数>）。留空则使用项目根目录的 .file-size-baseline。"
+    },
+    "limit_main": {
+      "type": "string",
+      "default": "800",
+      "description": "src/main 下 Java / Mapper XML 的行数上限。"
+    },
+    "limit_test": {
+      "type": "string",
+      "default": "1200",
+      "description": "src/test 下测试类的行数上限。"
+    }
+  }
+}

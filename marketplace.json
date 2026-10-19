@@ -1,0 +1,19 @@
+{
+  "name": "file-size-guard-market",
+  "plugins": [
+    {
+      "name": "file-size-guard",
+      "source": "./file-size-guard",
+      "version": "0.1.0",
+      "description": "Blocks oversized Java and MyBatis mapper XML before they are committed. New files: 800 lines (src/main) / 1200 lines (src/test). Baselined files may shrink, never grow.",
+      "displayName": "File Size Guard",
+      "displayName_i18n": {
+        "zh-CN": "文件体积闸门"
+      },
+      "description_i18n": {
+        "zh-CN": "提交前拦截过大的 Java 与 MyBatis Mapper XML：新文件 src/main 限 800 行、src/test 限 1200 行；基线内文件只许变小、不许再长。以插件开关控制启停。"
+      },
+      "category": "developer-tools"
+    }
+  ]
+}
